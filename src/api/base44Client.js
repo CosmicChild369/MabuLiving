@@ -199,19 +199,38 @@ function inferUserFromTarget(targetUrl = "") {
   };
 }
 
+function normalizeBase(base = "/") {
+  if (!base.startsWith("/")) return `/${base}`;
+  return base;
+}
+
+function toAppAbsolutePath(target = "/") {
+  const base = normalizeBase(import.meta.env.BASE_URL || "/");
+  const route = String(target || "/").startsWith("/") ? String(target || "/") : `/${target}`;
+  if (base === "/") return route;
+  return `${base.replace(/\/$/, "")}${route}`;
+}
+
+function clientNavigate(target = "/") {
+  if (!isBrowser()) return;
+  const absolutePath = toAppAbsolutePath(target);
+  window.history.pushState({}, "", absolutePath);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+}
+
 export const base44 = {
   auth: {
     me: async () => readUser(),
 
     logout: (redirectUrl) => {
       writeUser(defaultUser);
-      if (isBrowser() && redirectUrl) window.location.href = redirectUrl;
+      if (isBrowser()) clientNavigate(redirectUrl || "/");
     },
 
     redirectToLogin: (targetUrl) => {
       const user = inferUserFromTarget(targetUrl);
       writeUser(user);
-      if (isBrowser() && targetUrl) window.location.href = targetUrl;
+      if (isBrowser()) clientNavigate(targetUrl || "/");
     },
   },
 
