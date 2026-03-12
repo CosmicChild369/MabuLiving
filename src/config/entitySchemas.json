@@ -1,0 +1,177 @@
+[
+  {
+    "name": "Announcement",
+    "type": "object",
+    "properties": {
+      "title": { "type": "string" },
+      "content": { "type": "string", "description": "Rich text content" },
+      "category": {
+        "type": "string",
+        "enum": ["general", "maintenance", "payment", "safety", "event", "policy"],
+        "default": "general"
+      },
+      "priority": {
+        "type": "string",
+        "enum": ["normal", "important", "urgent"],
+        "default": "normal"
+      },
+      "published": { "type": "boolean", "default": true },
+      "author_name": { "type": "string" }
+    },
+    "required": ["title", "content"]
+  },
+  {
+    "name": "Complaint",
+    "type": "object",
+    "properties": {
+      "tenant_email": { "type": "string" },
+      "tenant_name": { "type": "string" },
+      "unit_number": { "type": "string" },
+      "type": {
+        "type": "string",
+        "enum": ["maintenance", "emergency", "abuse", "noise", "safety", "other"],
+        "description": "Type of complaint"
+      },
+      "title": { "type": "string" },
+      "description": { "type": "string" },
+      "priority": {
+        "type": "string",
+        "enum": ["low", "medium", "high", "critical"],
+        "default": "medium"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["received", "in_progress", "resolved", "closed"],
+        "default": "received"
+      },
+      "attachments": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Photo/video attachment URLs"
+      },
+      "admin_response": { "type": "string" },
+      "resolved_date": { "type": "string", "format": "date" }
+    },
+    "required": ["tenant_email", "type", "title", "description"]
+  },
+  {
+    "name": "ConcernForm",
+    "type": "object",
+    "properties": {
+      "tenant_email": { "type": "string" },
+      "tenant_name": { "type": "string" },
+      "unit_number": { "type": "string" },
+      "form_type": {
+        "type": "string",
+        "enum": ["move_out", "lease_termination", "transfer", "other"],
+        "default": "move_out"
+      },
+      "reason": { "type": "string" },
+      "move_out_date": { "type": "string", "format": "date" },
+      "file_url": { "type": "string", "description": "Signed concern form file" },
+      "status": {
+        "type": "string",
+        "enum": ["submitted", "reviewed", "approved", "denied"],
+        "default": "submitted"
+      },
+      "admin_notes": { "type": "string" }
+    },
+    "required": ["tenant_email", "form_type", "reason"]
+  },
+  {
+    "name": "Message",
+    "type": "object",
+    "properties": {
+      "sender_email": { "type": "string" },
+      "sender_name": { "type": "string" },
+      "recipient_email": { "type": "string" },
+      "subject": { "type": "string" },
+      "content": { "type": "string" },
+      "read": { "type": "boolean", "default": false },
+      "thread_id": { "type": "string", "description": "Groups messages in same conversation" }
+    },
+    "required": ["sender_email", "recipient_email", "content"]
+  },
+  {
+    "name": "Notification",
+    "type": "object",
+    "properties": {
+      "recipient_email": {
+        "type": "string",
+        "description": "Email of the tenant who receives this notification"
+      },
+      "type": {
+        "type": "string",
+        "enum": ["payment_update", "complaint_response", "announcement", "invoice"],
+        "description": "Notification category"
+      },
+      "title": { "type": "string" },
+      "message": { "type": "string" },
+      "read": { "type": "boolean", "default": false },
+      "related_id": {
+        "type": "string",
+        "description": "ID of the related entity (payment, complaint, announcement)"
+      },
+      "icon": {
+        "type": "string",
+        "description": "Icon hint: credit-card | alert-triangle | megaphone | file-text"
+      }
+    },
+    "required": ["recipient_email", "type", "title", "message"]
+  },
+  {
+    "name": "Payment",
+    "type": "object",
+    "properties": {
+      "tenant_email": { "type": "string" },
+      "tenant_name": { "type": "string" },
+      "unit_number": { "type": "string" },
+      "amount": { "type": "number" },
+      "payment_date": { "type": "string", "format": "date" },
+      "due_date": { "type": "string", "format": "date" },
+      "month_year": { "type": "string", "description": "e.g. March 2026" },
+      "proof_file_url": { "type": "string" },
+      "invoice_url": { "type": "string", "description": "Admin-generated invoice file URL" },
+      "invoice_number": { "type": "string" },
+      "status": {
+        "type": "string",
+        "enum": ["pending", "verified", "rejected", "overdue"],
+        "default": "pending"
+      },
+      "admin_notes": { "type": "string" }
+    },
+    "required": ["tenant_email", "amount", "month_year"]
+  },
+  {
+    "name": "RegistrationOTP",
+    "type": "object",
+    "properties": {
+      "code": { "type": "string", "description": "Unique OTP code e.g. MABU-A101-7X3K" },
+      "unit_number": { "type": "string" },
+      "building_name": { "type": "string", "description": "Property / building name" },
+      "monthly_rent": { "type": "number" },
+      "status": { "type": "string", "enum": ["active", "used", "expired"], "default": "active" },
+      "assigned_to_email": { "type": "string", "description": "Email of tenant who used this code" },
+      "assigned_to_name": { "type": "string" },
+      "notes": { "type": "string", "description": "Admin notes about this code" },
+      "expires_at": { "type": "string", "format": "date" }
+    },
+    "required": ["code", "unit_number"]
+  },
+  {
+    "name": "TenantProfile",
+    "type": "object",
+    "properties": {
+      "user_email": { "type": "string", "description": "Email linked to user account" },
+      "full_name": { "type": "string", "description": "Tenant full name" },
+      "phone": { "type": "string" },
+      "unit_number": { "type": "string", "description": "Apartment/unit number" },
+      "lease_start": { "type": "string", "format": "date" },
+      "lease_end": { "type": "string", "format": "date" },
+      "monthly_rent": { "type": "number" },
+      "status": { "type": "string", "enum": ["active", "former", "pending"], "default": "active" },
+      "profile_image": { "type": "string", "description": "Profile photo URL" }
+    },
+    "required": ["full_name", "unit_number"]
+  }
+]
