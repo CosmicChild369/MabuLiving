@@ -2,23 +2,44 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 export function Select({ value, onValueChange, children }) {
-  return React.Children.map(children, (child) => {
-    if (child?.type?.displayName === "SelectTrigger") {
-      return React.cloneElement(child, { value, onValueChange });
-    }
-    return child;
+  const childArray = React.Children.toArray(children);
+  const trigger = childArray.find((c) => c?.type?.displayName === "SelectTrigger");
+  const content = childArray.find((c) => c?.type === SelectContent);
+
+  const triggerChildren = React.Children.toArray(trigger?.props?.children || []);
+  const valueComp = triggerChildren.find((c) => c?.type === SelectValue);
+  const placeholder = valueComp?.props?.placeholder;
+
+  const options = React.Children.toArray(content?.props?.children || [])
+    .filter((c) => c?.type === SelectItem)
+    .map((item) => ({
+      value: item.props.value,
+      label:
+        typeof item.props.children === "string" || typeof item.props.children === "number"
+          ? String(item.props.children)
+          : String(item.props.value),
+      className: item.props.className,
+    }));
+
+  if (!trigger) return null;
+
+  return React.cloneElement(trigger, {
+    value,
+    onValueChange,
+    options,
+    placeholder,
   });
 }
 
-export function SelectTrigger({ className, value, onValueChange, children }) {
-  const childArray = React.Children.toArray(children);
-  const valueComp = childArray.find(c => c?.type === SelectValue);
-  const contentComp = childArray.find(c => c?.type === SelectContent);
-  const options = contentComp ? React.Children.toArray(contentComp.props.children).filter(Boolean) : [];
+export function SelectTrigger({ className, value, onValueChange, options = [], placeholder }) {
   return (
     <select className={cn("h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm", className)} value={value} onChange={(e) => onValueChange?.(e.target.value)}>
-      {valueComp?.props?.placeholder && <option value="">{valueComp.props.placeholder}</option>}
-      {options.map((item) => <option key={item.props.value} value={item.props.value}>{item.props.children}</option>)}
+      {placeholder ? <option value="">{placeholder}</option> : null}
+      {options.map((item) => (
+        <option key={item.value} value={item.value} className={item.className}>
+          {item.label}
+        </option>
+      ))}
     </select>
   );
 }
